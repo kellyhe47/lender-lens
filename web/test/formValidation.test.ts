@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   fieldErrorsFromDetails,
-  formatAmountText,
   parseAmount,
   validateForm,
   type FormValues,
@@ -42,6 +41,8 @@ describe('parseAmount', () => {
     expect(parseAmount('12000')).toBe(12000);
     expect(parseAmount('12,000.50')).toBe(12000.5);
     expect(parseAmount(' $15,000.01 ')).toBe(15000.01);
+    expect(parseAmount('12,000.')).toBe(12000); // a decimal point with nothing after it yet
+    expect(parseAmount('.5')).toBe(0.5);
   });
 
   it.each([
@@ -49,27 +50,12 @@ describe('parseAmount', () => {
     ['abc', 'Enter a valid dollar amount'],
     ['-5', 'Enter a valid dollar amount'],
     ['1.2.3', 'Enter a valid dollar amount'],
+    ['.', 'Enter a valid dollar amount'],
     ['0', 'Amount must be greater than 0'],
     ['0.00', 'Amount must be greater than 0'],
     ['100.999', 'Use at most 2 decimal places'],
   ])('rejects %j', (text, message) => {
     expect(parseAmount(text)).toBe(message);
-  });
-});
-
-describe('formatAmountText', () => {
-  it('adds thousands separators and keeps typed decimals', () => {
-    expect(formatAmountText('12000')).toBe('12,000');
-    expect(formatAmountText('1234567.5')).toBe('1,234,567.5');
-    expect(formatAmountText('12,000.50')).toBe('12,000.50');
-    expect(formatAmountText('500')).toBe('500');
-    expect(formatAmountText('12000.')).toBe('12,000'); // a trailing dot is dropped
-    expect(formatAmountText('$012000')).toBe('12,000');
-  });
-
-  it('leaves text it cannot parse untouched', () => {
-    expect(formatAmountText('abc')).toBe('abc');
-    expect(formatAmountText('')).toBe('');
   });
 });
 

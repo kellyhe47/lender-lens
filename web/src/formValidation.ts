@@ -43,21 +43,12 @@ export function validateForm(values: FormValues): FormResult {
 export function parseAmount(text: string): number | string {
   const cleaned = text.replace(/[$,\s]/g, '');
   if (cleaned === '') return 'Enter a treatment amount';
-  if (!/^\d+(\.\d*)?$/.test(cleaned)) return 'Enter a valid dollar amount';
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(cleaned)) return 'Enter a valid dollar amount'; // 12000, 12000.5, .5
   const decimals = cleaned.split('.')[1] ?? '';
   if (decimals.length > 2) return 'Use at most 2 decimal places';
   const amount = Number(cleaned);
   if (amount <= 0) return 'Amount must be greater than 0';
   return amount;
-}
-
-/** Adds thousands separators to a typed amount: "12000.5" -> "12,000.5", "12000." -> "12,000". */
-export function formatAmountText(text: string): string {
-  const cleaned = text.replace(/[$,\s]/g, '');
-  if (!/^\d+(\.\d*)?$/.test(cleaned)) return text; // leave anything unparseable for the user to fix
-  const [whole = '', decimals] = cleaned.split('.');
-  const grouped = Number(whole).toLocaleString('en-US');
-  return decimals ? `${grouped}.${decimals}` : grouped;
 }
 
 const FORM_FIELDS: readonly string[] = ['amount', 'creditBand', 'state', 'procedure'];

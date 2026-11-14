@@ -1,6 +1,7 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import type { CreditBand } from '../api';
-import { formatAmountText, type FieldErrors, type FormValues } from '../formValidation';
+import { caretAfterFormatting, formatAmountText } from '../amountInput';
+import type { FieldErrors, FormValues } from '../formValidation';
 import { US_STATES } from '../states';
 import { ProcedureInput } from './ProcedureInput';
 
@@ -26,13 +27,25 @@ export function QuoteForm({ errors, loading, onFieldChange, onSubmit }: Props) {
     onFieldChange(field); // editing a field clears its error
   }
 
-  function formatAmount() {
-    setValues((current) => ({ ...current, amount: formatAmountText(current.amount) }));
+  // The amount is reformatted with thousands separators on every keystroke.
+  function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target;
+    const typedBeforeCaret = input.value.slice(0, input.selectionStart ?? input.value.length);
+    const formatted = formatAmountText(input.value);
+    let caret = caretAfterFormatting(typedBeforeCaret, formatted);
+    // The Delete key on a comma changes nothing (the comma comes straight back),
+    // so step over it. Otherwise the caret would be stuck in front of it.
+    const pressedDelete = (event.nativeEvent as InputEvent).inputType === 'deleteContentForward';
+    if (pressedDelete && formatted === values.amount) caret += 1;
+    // Write the text and the caret back now, in the same event. If the text
+    // were only corrected on React's re-render, the caret would jump to the end.
+    input.value = formatted;
+    input.setSelectionRange(caret, caret);
+    setField('amount', formatted);
   }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    formatAmount(); // Enter submits without leaving the field, so format here too
     onSubmit(values);
   }
 
@@ -50,8 +63,8 @@ export function QuoteForm({ errors, loading, onFieldChange, onSubmit }: Props) {
             autoComplete="off"
             placeholder="0.00"
             value={values.amount}
-            onChange={(event) => setField('amount', event.target.value)}
-            onBlur={formatAmount}
+            onChange={handleAmountChange}
+            onBlur={() => setValues((current) => ({ ...current, amount: current.amount.replace(/\.$/, '') }))}
             aria-invalid={errors.amount !== undefined}
             aria-describedby={errors.amount && 'amount-error'}
           />

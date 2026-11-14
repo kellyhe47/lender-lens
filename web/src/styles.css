@@ -154,9 +154,20 @@ select {
   padding: 0 12px;
   font: inherit;
   color: inherit;
-  background: var(--surface);
+  background-color: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
+}
+
+/* The browser's own arrow sits tight against the border, so draw our own with
+   room on both sides. */
+select {
+  appearance: none;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23586474' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 8px;
 }
 
 input[aria-invalid='true'],
@@ -513,8 +524,8 @@ select[aria-invalid='true'] {
 }
 
 .donut svg {
-  width: 104px;
-  height: 104px;
+  width: 112px;
+  height: 112px;
 }
 
 circle.donut-principal {
@@ -525,22 +536,33 @@ circle.donut-interest {
   stroke: var(--interest);
 }
 
-.donut figcaption {
-  font-size: 0.8rem;
-  text-align: center;
+/* Breakdown under the donut: three columns (dot, label, amount), one row per line. */
+.breakdown {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 0.85rem;
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.donut figcaption span {
-  white-space: nowrap;
+.breakdown-amount {
+  margin-left: 8px;
+  text-align: right; /* so the cents line up, like a sum */
+  color: var(--ink);
+}
+
+.breakdown-total {
+  grid-column: 3; /* under the other amounts; the label column stays empty */
+  padding-top: 4px;
+  font-weight: 700;
+  border-top: 1px solid var(--border-strong);
 }
 
 .legend-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 4px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
 }
 
