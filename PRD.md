@@ -1,6 +1,6 @@
 # PRD: Lender Lens (Financing Offer Engine)
 
-Take-home for Endeavor, Product Engineer (Full-Stack). Source brief: `Take home assessment - Financing Offer Engine.md`.
+Take-home for Endeavor, Product Engineer (Full-Stack). Lender rules are provided in `api/lenders.json` and must not be altered.
 
 ## 1. Summary
 
