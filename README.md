@@ -129,25 +129,19 @@ From the PRD:
 Decisions I made where the PRD was silent:
 
 - **`amount` must be a JSON number.** `"12000"` as a string is a 400 rather than being coerced.
-- **Requests Fastify rejects before the route runs** (body is not valid JSON, for example) keep Fastify's 4xx status and use the same `VALIDATION_ERROR` shape, with `field: "body"`.
 - **`lenders.json` values are compared as written.** Requests are normalized; the file is assumed to already use upper-case states and bands and lower-case procedures, as the provided file does.
 - **No upper or lower limit on `amount` beyond "greater than 0".** Every provided lender has a `maxAmount`, so a huge amount is simply declined. At the other end, an amount of a few cents is approved with a payment that rounds to `$0.00` and total interest of `-$0.01`: that is the FR-B10 formula applied faithfully, and a real lender would have a minimum loan amount. No such rule is in the provided file, so none was invented.
 - **In the comparison, a shorter term counts as the better value.** The PRD asks for a better value in every row; for term that is a judgment call (debt-free sooner), and the summary line states the real trade-off.
-- **The donut's text equivalent is a three-row breakdown** under it: Principal, Interest, and the total on its own row, each with the same two-decimal currency format as everything else. FR-F6's example is a one-line sentence in whole dollars; rows read more clearly, and FR-F10 asks for consistent formatting.
-- **Decline explanations use the state's name** ("does not operate in Washington") rather than its code.
-- **Reason text and the summary line above results use the request that produced them,** not the current form values, which may have been edited since.
-- **The amount is formatted with thousands separators on every keystroke.** Anything that is not a digit or the first decimal point is dropped as it is typed, and so is a third digit after the decimal point, since the api rejects more than two. Because formatting adds and removes commas, the handler puts the caret back after the same digit it was after (`amountInput.ts`), so editing mid-number does not jump to the end.
-- **Suggestions appear on focus as well as while typing,** so staff can browse the list. The list hides once the text is a listed procedure or matches nothing, because it overlays the Get offers button.
-- **In compare mode the whole card is the click target.** The checkbox's label is stretched over the card in CSS, so it is still one real checkbox: keyboard use and the disabled third card need no extra code. Reason chips stay above it so their tooltips still work.
-- **Before two lenders are picked, compare mode shows the comparison's shape with empty values,** under the prompt. It shows what is coming and keeps the cards from jumping far when the real panel replaces it.
-- **The comparison scrolls into view when the second lender is picked.** It sits above the cards, so without this it would appear off screen.
-- **The summary line above results shows the procedure's label** ("Root canal"); decline explanations keep the lower-case value, as in the PRD's table.
-- **A field's error clears when that field is edited.** The sort choice persists across quotes; compare mode does not (FR-F9).
+- **Results describe the request that produced them,** not the current form values, which may have been edited since.
 - **The web request gives up after 10 seconds** and shows the error banner with Retry. A quote is a few milliseconds of arithmetic, so that long without an answer means the service is stuck.
-- **The stale-response guard is defensive.** The button is disabled while loading, so the UI cannot normally send overlapping requests; the guard (a request counter in `App.tsx`) makes that a guarantee rather than a side effect of the button state.
 - **The web app's only arithmetic** is the sort comparator, the subtraction of two api values for the comparison summary, and the interest's share of the donut ring for drawing.
-- **Extra files beyond the PRD's layout sketch:** `api/src/main.ts` (so tests can build the server without listening) and `types.ts`; `web/src/format.ts`, `states.ts`, `formValidation.ts`, `amountInput.ts`, `quoteState.ts`.
-- **The Offer types are written out in both services.** They share no code, so a contract change has to be made twice.
+
+## With more time
+
+- Share the request/response contract between the services (a small shared package or a generated OpenAPI client) instead of mirroring the types by hand.
+- Model a real schedule: adjust the final payment so the balance reaches exactly zero, and send money as integer cents on the wire.
+- Serve the procedure list from the api once more than one endpoint is allowed, so the UI and the lender rules cannot drift.
+- Tell "service unreachable", "timed out", and "returned an error" apart in the error banner.
 
 ## Manual test plan
 
