@@ -36,6 +36,10 @@ export interface FieldError {
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
+// A quote is a few milliseconds of arithmetic, so ten seconds without an answer
+// means the service is stuck. Give up then, instead of loading forever.
+const TIMEOUT_MS = 10_000;
+
 /** The api rejected the input (400). `details` says which fields and why. */
 export class QuoteValidationError extends Error {
   constructor(public details: FieldError[]) {
@@ -45,13 +49,14 @@ export class QuoteValidationError extends Error {
 
 /**
  * Asks the api for one offer per lender. Throws QuoteValidationError on a 400,
- * and a plain Error on a network failure or any other status.
+ * and a plain Error on a network failure, a timeout, or any other status.
  */
 export async function fetchQuote(request: QuoteRequest): Promise<Offer[]> {
   const response = await fetch(`${API_URL}/quote`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
+    signal: AbortSignal.timeout(TIMEOUT_MS), // fetch rejects when the time is up
   });
   if (response.status === 400) {
     const body: { details: FieldError[] } = await response.json();

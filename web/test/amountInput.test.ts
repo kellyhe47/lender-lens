@@ -21,6 +21,11 @@ describe('formatAmountText', () => {
     expect(formatAmountText('.5')).toBe('.5');
   });
 
+  it('keeps at most two digits after the decimal point', () => {
+    expect(formatAmountText('100.999')).toBe('100.99');
+    expect(formatAmountText('10000000.59912000')).toBe('10,000,000.59');
+  });
+
   it('drops everything that is not a digit or the first decimal point', () => {
     expect(formatAmountText('$12,000')).toBe('12,000');
     expect(formatAmountText('12 000')).toBe('12,000');

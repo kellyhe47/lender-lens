@@ -39,6 +39,9 @@ const ROWS: { label: string; field: ComparedField; format: (value: number) => st
   { label: 'Total cost', field: 'totalCost', format: formatCurrency },
 ];
 
+/** The row labels alone, for the empty comparison shown before two lenders are picked. */
+export const COMPARISON_LABELS = ROWS.map((row) => row.label);
+
 export function comparisonRows(left: ApprovedOffer, right: ApprovedOffer): ComparisonRow[] {
   return ROWS.map(({ label, field, format }) => ({
     label,

@@ -2,9 +2,10 @@
 // turning the text into a number, and rejecting bad input, is formValidation's job.
 
 /**
- * Formats typed text as a dollar amount: digits with thousands separators and
- * at most one decimal point. Anything else is dropped, so "$12000.5" becomes
- * "12,000.5". A trailing "." is kept, because the user may be about to type cents.
+ * Formats typed text as a dollar amount: digits with thousands separators, at
+ * most one decimal point, and at most two digits after it (cents). Anything
+ * else is dropped, so "$12000.505" becomes "12,000.50". A trailing "." is kept,
+ * because the user may be about to type cents.
  */
 export function formatAmountText(text: string): string {
   const cleaned = text.replace(/[^\d.]/g, '');
@@ -13,7 +14,7 @@ export function formatAmountText(text: string): string {
   // BigInt, so a very long number is grouped exactly and leading zeros go.
   const grouped = whole === '' ? '' : BigInt(whole).toLocaleString('en-US');
   if (dot === -1) return grouped;
-  const decimals = cleaned.slice(dot + 1).replace(/\./g, '');
+  const decimals = cleaned.slice(dot + 1).replace(/\./g, '').slice(0, 2);
   return `${grouped}.${decimals}`;
 }
 

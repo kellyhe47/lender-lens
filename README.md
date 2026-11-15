@@ -136,23 +136,18 @@ Decisions I made where the PRD was silent:
 - **The donut's text equivalent is a three-row breakdown** under it: Principal, Interest, and the total on its own row, each with the same two-decimal currency format as everything else. FR-F6's example is a one-line sentence in whole dollars; rows read more clearly, and FR-F10 asks for consistent formatting.
 - **Decline explanations use the state's name** ("does not operate in Washington") rather than its code.
 - **Reason text and the summary line above results use the request that produced them,** not the current form values, which may have been edited since.
-- **The amount is formatted with thousands separators on every keystroke.** Anything that is not a digit or the first decimal point is dropped as it is typed. Because formatting adds and removes commas, the handler puts the caret back after the same digit it was after (`amountInput.ts`), so editing mid-number does not jump to the end.
+- **The amount is formatted with thousands separators on every keystroke.** Anything that is not a digit or the first decimal point is dropped as it is typed, and so is a third digit after the decimal point, since the api rejects more than two. Because formatting adds and removes commas, the handler puts the caret back after the same digit it was after (`amountInput.ts`), so editing mid-number does not jump to the end.
 - **Suggestions appear on focus as well as while typing,** so staff can browse the list. The list hides once the text is a listed procedure or matches nothing, because it overlays the Get offers button.
+- **In compare mode the whole card is the click target.** The checkbox's label is stretched over the card in CSS, so it is still one real checkbox: keyboard use and the disabled third card need no extra code. Reason chips stay above it so their tooltips still work.
+- **Before two lenders are picked, compare mode shows the comparison's shape with empty values,** under the prompt. It shows what is coming and keeps the cards from jumping far when the real panel replaces it.
+- **The comparison scrolls into view when the second lender is picked.** It sits above the cards, so without this it would appear off screen.
+- **The summary line above results shows the procedure's label** ("Root canal"); decline explanations keep the lower-case value, as in the PRD's table.
 - **A field's error clears when that field is edited.** The sort choice persists across quotes; compare mode does not (FR-F9).
+- **The web request gives up after 10 seconds** and shows the error banner with Retry. A quote is a few milliseconds of arithmetic, so that long without an answer means the service is stuck.
 - **The stale-response guard is defensive.** The button is disabled while loading, so the UI cannot normally send overlapping requests; the guard (a request counter in `App.tsx`) makes that a guarantee rather than a side effect of the button state.
 - **The web app's only arithmetic** is the sort comparator, the subtraction of two api values for the comparison summary, and the interest's share of the donut ring for drawing.
 - **Extra files beyond the PRD's layout sketch:** `api/src/main.ts` (so tests can build the server without listening) and `types.ts`; `web/src/format.ts`, `states.ts`, `formValidation.ts`, `amountInput.ts`, `quoteState.ts`.
 - **The Offer types are written out in both services.** They share no code, so a contract change has to be made twice.
-
-## With more time
-
-- Share the request/response contract between the services (a small shared package or a generated OpenAPI client) instead of mirroring the types by hand.
-- Add component tests and an in-repo end-to-end test. Today the UI is covered by unit tests on its logic plus the manual plan below.
-- Model a real schedule: adjust the final payment so the balance reaches exactly zero, and send money as integer cents on the wire.
-- Serve the procedure list from the api once more than one endpoint is allowed, so the UI and the lender rules cannot drift.
-- Give the web request a timeout, and distinguish "service unreachable" from "service returned an error" in the banner.
-- Production concerns left out on purpose: request logging with correlation IDs, rate limiting, a health check, a build step and container for the api.
-- A screen-reader pass. Controls are keyboard-operable with visible focus, and state is never carried by color alone, but I have not tested with assistive technology.
 
 ## Manual test plan
 
@@ -162,14 +157,14 @@ Start both services, then open http://localhost:5173.
 | --- | --- | --- |
 | 1 | Load the page. | "No offers yet" prompt on the right. No cards. |
 | 2 | Select **Get offers** with the form empty. | Four inline errors, one per field. No request is sent. |
-| 3 | Type `10000` in the amount, then three more zeros. Click after the first digit and type another. | The field shows `10,000`, then `10,000,000`: commas are always in the right place. The mid-number edit leaves the caret where you typed. Letters are ignored. The field's error clears. |
+| 3 | Type `10000` in the amount, then three more zeros. Click after the first digit and type another. | The field shows `10,000`, then `10,000,000`: commas are always in the right place. The mid-number edit leaves the caret where you typed. Letters are ignored, and so is a third digit after a decimal point. The field's error clears. |
 | 4 | In Procedure, type `ca`. | Suggestions "Root canal" and "Cataract surgery" appear below. Arrow keys highlight; Enter or a click picks one. |
 | 5 | Type `sedation` in Procedure and submit. | "Choose a listed procedure". No request is sent. |
 | 6 | **G1:** 12000 / B / Texas / General, submit. | Skeleton cards and a disabled "Getting offers…" button, briefly. Then "3 approved": Charlie $321.33, Alpha $398.00, Bravo $581.27, in that order. Charlie is tagged "Lowest monthly payment". Each card has an Approved badge with a check mark, APR, term, total interest, total cost, a donut that is not clipped, with Principal / Interest / total rows under it, and `OK_*` chips. No "declined" heading. |
 | 7 | Hover an `OK_*` chip, then Tab to one. | A tooltip with the explanation, for example "Amount within limit." |
 | 8 | Change **Sort by** to APR, then Total cost. | APR: Alpha, Charlie, Bravo, tag "Lowest APR". Total cost: Bravo, Alpha, Charlie, tag "Lowest total cost". |
-| 9 | Look for checkboxes, then select **Compare lenders**. | No checkboxes or panel before the click. After it, a checkbox on each approved card and "Select two lenders to compare." |
-| 10 | Tick Alpha and Charlie. | Bravo's checkbox disables. A panel shows APR, term, monthly payment, total interest, total cost side by side, the better value in each row marked with a check, and "Charlie is $76.67/mo lower; Alpha costs $1,095.84 less overall". |
+| 9 | Look for checkboxes, then select **Compare lenders**. | No checkboxes or panel before the click. After it, a checkbox on each approved card and a dashed panel: "Select two lenders to compare." above an empty comparison (row labels with gray bars for values). |
+| 10 | Click anywhere on Alpha's card, then tick Charlie's checkbox. | Both cards get a blue outline. Bravo's card dims and its checkbox disables. A panel shows APR, term, monthly payment, total interest, total cost side by side, the better value in each row marked with a check, and "Charlie is $76.67/mo lower; Alpha costs $1,095.84 less overall". |
 | 11 | Untick one, tick another; then select **Done**. | The panel follows the selection. Done removes the checkboxes and the panel. |
 | 12 | Enter compare mode, tick two, then submit the form again. | The new results are not in compare mode. |
 | 13 | **G2:** change Procedure to Implants, submit. | "2 approved", then "1 declined": Bravo, with a Declined badge and cross, `DECLINE_PROCEDURE`, and "This lender does not finance implants procedures." No payment, APR, or donut on that card. In compare mode Bravo has no checkbox. |
@@ -178,5 +173,6 @@ Start both services, then open http://localhost:5173.
 | 16 | **G5:** 40000 / D / Washington / Implants. | Alpha: amount, credit. Bravo: amount, procedure, state (no credit). Charlie: amount, credit, state. No lender limit is shown anywhere. |
 | 17 | Stop the api (Ctrl+C), then submit. | A red banner, "We couldn't reach the quote service.", with **Retry**. The form keeps its values. |
 | 18 | Start the api again, select **Retry**. | Results appear; the banner is gone. |
-| 19 | Complete and submit the form using only the keyboard. | Tab reaches every control, arrow keys change the credit band, focus is always visible. |
-| 20 | Narrow the window below about 860px. | One column: form on top, results below. No horizontal scrolling. |
+| 19 | Pause the api (`kill -STOP $(lsof -ti :3001 -sTCP:LISTEN)`), then submit. Resume it with `-CONT` and select **Retry**. | Skeleton cards for 10 seconds, then the red banner. After resuming, Retry shows results. |
+| 20 | Complete and submit the form using only the keyboard. | Tab reaches every control, arrow keys change the credit band, focus is always visible. |
+| 21 | Narrow the window below about 860px. | One column: form on top, results below. No horizontal scrolling. |

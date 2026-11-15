@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { fetchQuote, QuoteValidationError, type QuoteRequest } from './api';
+import { LogoMark } from './components/icons';
 import { QuoteForm } from './components/QuoteForm';
 import { ResultsPanel } from './components/ResultsPanel';
 import { fieldErrorsFromDetails, validateForm, type FieldErrors, type FormValues } from './formValidation';
@@ -44,10 +45,15 @@ export function App() {
   }
 
   return (
-    <div className="page">
+    <>
       <header className="page-header">
-        <h1>Lender Lens</h1>
-        <p>Compare patient financing offers across lenders.</p>
+        <div className="page-header-inner">
+          <LogoMark />
+          <div>
+            <h1>Lender Lens</h1>
+            <p>Compare patient financing offers across lenders.</p>
+          </div>
+        </div>
       </header>
       <main className="layout">
         <QuoteForm
@@ -58,6 +64,6 @@ export function App() {
         />
         <ResultsPanel quote={quote} sortKey={sortKey} onSortChange={setSortKey} onRetry={getOffers} />
       </main>
-    </div>
+    </>
   );
 }

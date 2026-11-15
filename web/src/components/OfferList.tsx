@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { Offer, QuoteRequest } from '../api';
 import { isSelectionFull, toggleSelection } from '../compareOffers';
 import { formatCurrency } from '../format';
+import { procedureLabel } from '../procedures';
 import { groupOffers, SORT_OPTIONS, type SortKey } from '../sortOffers';
 import { stateName } from '../states';
 import { ApprovedCard } from './ApprovedCard';
-import { ComparePanel } from './ComparePanel';
+import { ComparePanel, ComparePlaceholder } from './ComparePanel';
 import { DeclinedCard } from './DeclinedCard';
 
 interface Props {
@@ -34,7 +35,7 @@ export function OfferList({ offers, request, sortKey, onSortChange }: Props) {
     <>
       <p className="request-summary">
         Offers for {formatCurrency(request.amount)} · credit band {request.creditBand} ·{' '}
-        {stateName(request.state)} · {request.procedure}
+        {stateName(request.state)} · {procedureLabel(request.procedure)}
       </p>
 
       {approved.length === 0 && (
@@ -67,11 +68,7 @@ export function OfferList({ offers, request, sortKey, onSortChange }: Props) {
           </div>
 
           {comparing &&
-            (left && right ? (
-              <ComparePanel left={left} right={right} />
-            ) : (
-              <p className="compare-hint">Select two lenders to compare.</p>
-            ))}
+            (left && right ? <ComparePanel left={left} right={right} /> : <ComparePlaceholder />)}
 
           {approved.map((offer, index) => (
             <ApprovedCard

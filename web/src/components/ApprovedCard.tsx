@@ -16,7 +16,7 @@ interface Props {
 
 export function ApprovedCard({ offer, request, tag, compare }: Props) {
   return (
-    <article className="card offer-card">
+    <article className="card offer-card offer-approved">
       <header className="offer-header">
         {compare && (
           <label className="compare-check">
@@ -27,6 +27,8 @@ export function ApprovedCard({ offer, request, tag, compare }: Props) {
               onChange={compare.onToggle}
             />
             Compare
+            {/* So a screen reader hears "Compare Alpha", not three identical "Compare"s. */}
+            <span className="sr-only"> {offer.lender}</span>
           </label>
         )}
         <h3>{offer.lender}</h3>

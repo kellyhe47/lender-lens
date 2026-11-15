@@ -1,5 +1,6 @@
+import { useEffect, useRef } from 'react';
 import type { ApprovedOffer } from '../api';
-import { comparisonRows, tradeOffSummary } from '../compareOffers';
+import { COMPARISON_LABELS, comparisonRows, tradeOffSummary } from '../compareOffers';
 import { CheckIcon } from './icons';
 
 interface Props {
@@ -9,8 +10,15 @@ interface Props {
 
 /** Two approved offers side by side, with the better value in each row marked (FR-F9). */
 export function ComparePanel({ left, right }: Props) {
+  // The panel sits above the cards, so it is often off screen when the second
+  // lender is picked further down. Bring it into view when it appears.
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    panel.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, []);
+
   return (
-    <section className="card compare-panel" aria-label="Lender comparison">
+    <section className="card compare-panel" aria-label="Lender comparison" ref={panel}>
       <table>
         <thead>
           <tr>
@@ -30,6 +38,37 @@ export function ComparePanel({ left, right }: Props) {
         </tbody>
       </table>
       <p className="compare-summary">{tradeOffSummary(left, right)}</p>
+    </section>
+  );
+}
+
+/**
+ * Shown in compare mode until two lenders are picked: the prompt, then the
+ * shape of the comparison with its values empty. The table is decoration, so
+ * screen readers get only the prompt.
+ */
+export function ComparePlaceholder() {
+  return (
+    <section className="card compare-panel compare-placeholder" aria-label="Lender comparison">
+      <p className="compare-hint">Select two lenders to compare.</p>
+      <table aria-hidden="true">
+        <thead>
+          <tr>
+            <td />
+            <th><span className="placeholder-bar" /></th>
+            <th><span className="placeholder-bar" /></th>
+          </tr>
+        </thead>
+        <tbody>
+          {COMPARISON_LABELS.map((label) => (
+            <tr key={label}>
+              <th>{label}</th>
+              <td><span className="placeholder-bar" /></td>
+              <td><span className="placeholder-bar" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 }

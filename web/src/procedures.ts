@@ -33,6 +33,11 @@ function normalize(text: string): string {
   return text.trim().toLowerCase();
 }
 
+/** The display label for an api value, e.g. "root canal" -> "Root canal". */
+export function procedureLabel(value: string): string {
+  return PROCEDURES.find((procedure) => procedure.value === value)?.label ?? value;
+}
+
 /** Known procedures containing the typed text. Empty text matches them all. */
 export function suggestProcedures(text: string): Procedure[] {
   const query = normalize(text);

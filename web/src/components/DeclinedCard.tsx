@@ -11,7 +11,7 @@ interface Props {
 /** Lender, Declined badge, and every reason with its explanation shown inline (FR-F7, FR-F8). */
 export function DeclinedCard({ offer, request }: Props) {
   return (
-    <article className="card offer-card">
+    <article className="card offer-card offer-declined">
       <header className="offer-header">
         <h3>{offer.lender}</h3>
         <span className="badge badge-declined">

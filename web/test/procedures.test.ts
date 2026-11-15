@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PROCEDURES, resolveProcedure, suggestProcedures } from '../src/procedures';
+import { PROCEDURES, procedureLabel, resolveProcedure, suggestProcedures } from '../src/procedures';
 
 describe('PROCEDURES', () => {
   it('lists the 10 dental and 5 vision procedures from the PRD', () => {
@@ -12,6 +12,17 @@ describe('PROCEDURES', () => {
     for (const procedure of PROCEDURES) {
       expect(procedure.label.toLowerCase()).toBe(procedure.value);
     }
+  });
+});
+
+describe('procedureLabel', () => {
+  it('returns the display label for a listed value', () => {
+    expect(procedureLabel('root canal')).toBe('Root canal');
+    expect(procedureLabel('lasik')).toBe('LASIK');
+  });
+
+  it('falls back to the value itself when it is not listed', () => {
+    expect(procedureLabel('sedation')).toBe('sedation');
   });
 });
 

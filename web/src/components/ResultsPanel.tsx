@@ -1,6 +1,7 @@
 import type { QuoteRequest } from '../api';
 import type { QuoteState } from '../quoteState';
 import type { SortKey } from '../sortOffers';
+import { EmptyIllustration } from './icons';
 import { OfferList } from './OfferList';
 
 interface Props {
@@ -16,6 +17,7 @@ export function ResultsPanel({ quote, sortKey, onSortChange, onRetry }: Props) {
     <section className="results" aria-label="Lender offers" aria-busy={quote.status === 'loading'}>
       {quote.status === 'initial' && (
         <div className="card empty-state">
+          <EmptyIllustration />
           <h2>No offers yet</h2>
           <p>Enter the patient's details and select Get offers to see which lenders approve and what each would cost.</p>
         </div>
@@ -35,9 +37,9 @@ export function ResultsPanel({ quote, sortKey, onSortChange, onRetry }: Props) {
       {quote.status === 'error' && (
         <div className="banner banner-error" role="alert">
           <p>
-            <strong>We couldn't reach the quote service.</strong> Your entries are still here. Try again in a moment.
+            <strong>We couldn't reach the quote service.</strong> Try again in a moment.
           </p>
-          <button type="button" className="button" onClick={() => onRetry(quote.request)}>
+          <button type="button" className="button button-danger" onClick={() => onRetry(quote.request)}>
             Retry
           </button>
         </div>
