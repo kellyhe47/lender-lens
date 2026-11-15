@@ -149,24 +149,13 @@ Start both services, then open http://localhost:5173.
 
 | # | Do this | Expect |
 | --- | --- | --- |
-| 1 | Load the page. | "No offers yet" prompt on the right. No cards. |
-| 2 | Select **Get offers** with the form empty. | Four inline errors, one per field. No request is sent. |
-| 3 | Type `10000` in the amount, then three more zeros. Click after the first digit and type another. | The field shows `10,000`, then `10,000,000`: commas are always in the right place. The mid-number edit leaves the caret where you typed. Letters are ignored, and so is a third digit after a decimal point. The field's error clears. |
-| 4 | In Procedure, type `ca`. | Suggestions "Root canal" and "Cataract surgery" appear below. Arrow keys highlight; Enter or a click picks one. |
-| 5 | Type `sedation` in Procedure and submit. | "Choose a listed procedure". No request is sent. |
-| 6 | **G1:** 12000 / B / Texas / General, submit. | Skeleton cards and a disabled "Getting offers…" button, briefly. Then "3 approved": Charlie $321.33, Alpha $398.00, Bravo $581.27, in that order. Charlie is tagged "Lowest monthly payment". Each card has an Approved badge with a check mark, APR, term, total interest, total cost, a donut that is not clipped, with Principal / Interest / total rows under it, and `OK_*` chips. No "declined" heading. |
-| 7 | Hover an `OK_*` chip, then Tab to one. | A tooltip with the explanation, for example "Amount within limit." |
-| 8 | Change **Sort by** to APR, then Total cost. | APR: Alpha, Charlie, Bravo, tag "Lowest APR". Total cost: Bravo, Alpha, Charlie, tag "Lowest total cost". |
-| 9 | Look for checkboxes, then select **Compare lenders**. | No checkboxes or panel before the click. After it, a checkbox on each approved card and a dashed panel: "Select two lenders to compare." above an empty comparison (row labels with gray bars for values). |
-| 10 | Click anywhere on Alpha's card, then tick Charlie's checkbox. | Both cards get a blue outline. Bravo's card dims and its checkbox disables. A panel shows APR, term, monthly payment, total interest, total cost side by side, the better value in each row marked with a check, and "Charlie is $76.67/mo lower; Alpha costs $1,095.84 less overall". |
-| 11 | Untick one, tick another; then select **Done**. | The panel follows the selection. Done removes the checkboxes and the panel. |
-| 12 | Enter compare mode, tick two, then submit the form again. | The new results are not in compare mode. |
-| 13 | **G2:** change Procedure to Implants, submit. | "2 approved", then "1 declined": Bravo, with a Declined badge and cross, `DECLINE_PROCEDURE`, and "This lender does not finance implants procedures." No payment, APR, or donut on that card. In compare mode Bravo has no checkbox. |
-| 14 | 12000 / B / Washington / General. | "1 approved" (Alpha), "2 declined". No **Compare lenders** button. |
-| 15 | **G4:** 12000 / D / Texas / General. | "No lender approved this request." and "3 declined", each with the credit band explanation. No sort control, no Compare button. |
-| 16 | **G5:** 40000 / D / Washington / Implants. | Alpha: amount, credit. Bravo: amount, procedure, state (no credit). Charlie: amount, credit, state. No lender limit is shown anywhere. |
-| 17 | Stop the api (Ctrl+C), then submit. | A red banner, "We couldn't reach the quote service.", with **Retry**. The form keeps its values. |
-| 18 | Start the api again, select **Retry**. | Results appear; the banner is gone. |
-| 19 | Pause the api (`kill -STOP $(lsof -ti :3001 -sTCP:LISTEN)`), then submit. Resume it with `-CONT` and select **Retry**. | Skeleton cards for 10 seconds, then the red banner. After resuming, Retry shows results. |
-| 20 | Complete and submit the form using only the keyboard. | Tab reaches every control, arrow keys change the credit band, focus is always visible. |
-| 21 | Narrow the window below about 860px. | One column: form on top, results below. No horizontal scrolling. |
+| 1 | Select **Get offers** with the form empty. Then type `sedation` in Procedure and submit. | Four inline errors, one per field; then "Choose a listed procedure". No request is sent either time. |
+| 2 | **G1:** 12000 / B / Texas / General, submit. | Skeleton cards briefly, then "3 approved": Charlie $321.33, Alpha $398.00, Bravo $581.27, in that order. Charlie is tagged "Lowest monthly payment". Hovering an `OK_*` chip shows its explanation. |
+| 3 | Change **Sort by** to APR, then Total cost. | APR: Alpha first, tag "Lowest APR". Total cost: Bravo first, tag "Lowest total cost". |
+| 4 | Select **Compare lenders**, click Alpha's card, then Charlie's. Then select **Done**. | Bravo's card dims and cannot be picked. The panel shows the two side by side with the better value in each row marked, and "Charlie is $76.67/mo lower; Alpha costs $1,095.84 less overall". Done removes the checkboxes and the panel. |
+| 5 | **G2:** change Procedure to Implants, submit. | "2 approved", then "1 declined": Bravo, with `DECLINE_PROCEDURE` and "This lender does not finance implants procedures." No payment, APR, or donut on that card. |
+| 6 | **Boundary (G6, G7):** 15000 / B / Texas / General, then 15000.01. | 15,000 is approved by all three. At 15,000.01 Bravo declines with `DECLINE_AMOUNT`. |
+| 7 | **G4:** 12000 / D / Texas / General. | "No lender approved this request." and "3 declined", each with the credit band explanation. No sort control, no Compare button. |
+| 8 | **G5:** 40000 / D / Washington / Implants. | Alpha: amount, credit. Bravo: amount, procedure, state, and no credit. Charlie: amount, credit, state. |
+| 9 | Stop the api (Ctrl+C), then submit. Start it again and select **Retry**. | A red banner, "We couldn't reach the quote service.", with **Retry**; the form keeps its values. After the restart, Retry shows results. |
+| 10 | Narrow the window below about 860px. | One column: form on top, results below. No horizontal scrolling. |
